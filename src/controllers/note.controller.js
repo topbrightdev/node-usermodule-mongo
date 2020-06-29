@@ -23,6 +23,8 @@ exports.create = async (req, res) => {
                 } else {
                     user.password = hash;
                     console.log(user);
+                    user.active = true;
+                    console.log(user);
                     const newuser = await User.create(user);
                     console.log(newuser);
                     if (!newuser) {
@@ -164,7 +166,6 @@ exports.afterForgotChangePwd = async (req, res) => {
     }
 }
 
-
 exports.findAll = async (req, res) => {
     try {
         let token = null;
@@ -202,9 +203,6 @@ exports.findOne = async (req, res) => {
     try {
         const getuser = await User.findById(req.params.id);
         console.log(getuser);
-        // const userInfo = req.body;
-        // const newUser = await User.findOne({email: userInfo.email, password: userInfo.password});
-        // console.log(newUser);
         if (!getuser) {
             return res.status(404).json({error: true, message: 'User not found!!'});
         } else {
@@ -216,62 +214,54 @@ exports.findOne = async (req, res) => {
 };
 
 // Update a note identified by the noteId in the request
-exports.update = (req, res) => {
-
+exports.update = async (req, res) => {
+    try {
+        let token = null;
+        let authUser = null;
+        const bearerHeader = req.headers['authorization'];
+        if (typeof bearerHeader !== 'undefined') {
+            const bearer = bearerHeader.split(' ');
+            const bearerToken = bearer[1];
+            token = bearerToken;
+        } else {
+            return res.status(401).json({error: true, message: 'Authorisation Failed.'});
+        }
+        jwt.verify(token, 'secretkey', (err, authData) => {
+            if (err) {
+                console.log(err);
+                return res.status(401).json({error: true, message: 'Authorisation Failed.'});
+            } else {
+                console.log(authData);
+                authUser = authData;
+            }
+        });
+        console.log(authUser.userFind);
+        if (authUser.userFind.email === req.params.email) {
+            if (req.body.email === "" || req.body.phone === "" || req.body.name === "") {
+                return res.status(400).json({error: true, message: 'Bad Request', data: "All Fields are mandatory!!"});
+            } else {
+                const newuser = await User.update({_id: authUser.userFind._id}, {
+                    $set: {
+                        email: req.body.email,
+                        phone: req.body.phone,
+                        name: req.body.name
+                    }
+                });
+                console.log(newuser);
+                if (!newuser) {
+                    return res.status(500).json({error: true, message: 'Server Error'});
+                }
+                return res.status(200).json({success: true, user: newuser});
+            }
+        } else {
+            return res.status(404).json({error: true, message: 'User not found!!'});
+        }
+    } catch (e) {
+        return res.status(e.status).json({error: true, message: "Server is try later!"});
+    }
 };
 
 // Delete a note with the specified noteId in the request
 exports.delete = (req, res) => {
 
 };
-
-
-// app.post('/api/posts', verifyToken, (req, res) => {
-//     jwt.verify(req.token, 'secretkey', (err, authData) => {
-//         if(err) {
-//             res.sendStatus(403);
-//         } else {
-//             res.json({
-//                 message: 'Post created...',
-//                 authData
-//             });
-//         }
-//     });
-// });
-
-// app.post('/api/login', (req, res) => {
-//     // Mock user
-//     const user = {
-//         id: 1,
-//         username: 'brad',
-//         email: 'brad@gmail.com'
-//     }
-//
-//     jwt.sign({user}, 'secretkey', { expiresIn: '30s' }, (err, token) => {
-//         res.json({
-//             token
-//         });
-//     });
-// });
-
-// FORMAT OF TOKEN
-// Authorization: Bearer <access_token>
-
-// Verify Token
-// function verifyToken(req, res, next) {
-//     // Get auth header value
-//     const bearerHeader = req.headers['authorization'];
-//     // Check if bearer is undefined
-//     if(typeof bearerHeader !== 'undefined') {
-//         // Split at the space
-//         const bearer = bearerHeader.split(' ');
-//         // Get token from array
-//         const bearerToken = bearer[1];
-//         // Set the token
-//         req.token = bearerToken;
-//         // Next middleware
-//         next();
-//     } else {
-//         // Forbidden
-//         res.sendStatus(403);
-//     }

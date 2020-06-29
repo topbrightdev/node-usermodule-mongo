@@ -23,8 +23,8 @@ module.exports = (app) => {
     app.post('/api/v1/users/forgotChangePassword', users.afterForgotChangePwd);
 
     // Update a Note with noteId
-    app.put('/api/v1/users/:userId', users.update);
+    app.put('/api/v1/users/:email', users.update);
 
     // Delete a Note with noteId
-    app.delete('/api/v1/users/:userId', users.delete);
+    app.delete('/api/v1/users/:email', users.delete);
 }
