@@ -240,9 +240,8 @@ exports.update = async (req, res) => {
             if (req.body.email === "" || req.body.phone === "" || req.body.name === "") {
                 return res.status(400).json({error: true, message: 'Bad Request', data: "All Fields are mandatory!!"});
             } else {
-                const newuser = await User.update({_id: authUser.userFind._id}, {
+                const newuser = await User.updateOne({_id: authUser.userFind._id}, {
                     $set: {
-                        email: req.body.email,
                         phone: req.body.phone,
                         name: req.body.name
                     }
@@ -262,6 +261,38 @@ exports.update = async (req, res) => {
 };
 
 // Delete a note with the specified noteId in the request
-exports.delete = (req, res) => {
-
+exports.delete = async (req, res) => {
+    try {
+        let token = null;
+        let authUser = null;
+        const bearerHeader = req.headers['authorization'];
+        if (typeof bearerHeader !== 'undefined') {
+            const bearer = bearerHeader.split(' ');
+            token = bearer[1];
+        } else {
+            return res.status(401).json({error: true, message: 'Authorisation Failed.'});
+        }
+        jwt.verify(token, 'secretkey', (err, authData) => {
+            if (err) {
+                console.log(err);
+                return res.status(401).json({error: true, message: 'Authorisation Failed.'});
+            } else {
+                console.log(authData);
+                authUser = authData;
+            }
+        });
+        console.log(authUser.userFind);
+        if (authUser.userFind.email === req.params.email) {
+            const newuser = await User.deleteOne({_id: authUser.userFind._id});
+            console.log(newuser);
+            if (!newuser) {
+                return res.status(500).json({error: true, message: 'Server Error'});
+            }
+            return res.status(204).json({success: true, message: "user deleted successfully!!"});
+        } else {
+            return res.status(404).json({error: true, message: 'User not found!!'});
+        }
+    } catch (e) {
+        return res.status(e.status).json({error: true, message: "Server is try later!"});
+    }
 };
