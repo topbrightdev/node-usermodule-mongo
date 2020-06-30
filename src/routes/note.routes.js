@@ -16,15 +16,15 @@ module.exports = (app) => {
     // Change User Password using token
     app.put('/api/v1/users/changePassword', users.changePassword);
 
-    // Change User Password using token
+    // forgot password request with email
     app.post('/api/v1/users/forgotPassword', users.forgotPassword);
 
-    // Change User Password using token
+    // Change User Password after forgot password using temporary token
     app.post('/api/v1/users/forgotChangePassword', users.afterForgotChangePwd);
 
-    // Update a Note with noteId
+    // Update a user with userEmail
     app.put('/api/v1/users/update/:email', users.update);
 
-    // Delete a Note with noteId
+    // Delete a user with userEmail
     app.delete('/api/v1/users/delete/:email', users.delete);
 }

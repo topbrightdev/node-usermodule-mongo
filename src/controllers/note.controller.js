@@ -2,6 +2,7 @@ const User = require('../models/note.model.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+//user create/insert into DB
 exports.create = async (req, res) => {
     try {
         if (req.body.email === "" || req.body.phone === "" || req.body.name === "" || req.body.password === "") {
@@ -43,6 +44,7 @@ exports.create = async (req, res) => {
     }
 }
 
+//user login by email and password and get user token
 exports.login = async (req, res) => {
     try {
         const userInfo = req.body;
@@ -66,6 +68,7 @@ exports.login = async (req, res) => {
     }
 }
 
+//change password  by request token
 exports.changePassword = async (req, res) => {
     try {
         let token = null;
@@ -109,6 +112,7 @@ exports.changePassword = async (req, res) => {
     }
 }
 
+//forgot Password request get temp token by email request
 exports.forgotPassword = async (req, res) => {
     try {
         const userInfo = req.body;
@@ -125,6 +129,7 @@ exports.forgotPassword = async (req, res) => {
     }
 }
 
+//after forgotPassword request change password by temporary token
 exports.afterForgotChangePwd = async (req, res) => {
     try {
         let token = null;
@@ -166,6 +171,7 @@ exports.afterForgotChangePwd = async (req, res) => {
     }
 }
 
+//get all users from DB
 exports.findAll = async (req, res) => {
     try {
         let token = null;
@@ -199,6 +205,7 @@ exports.findAll = async (req, res) => {
     }
 };
 
+//find an user by userId
 exports.findOne = async (req, res) => {
     try {
         const getuser = await User.findById(req.params.id);
@@ -213,7 +220,7 @@ exports.findOne = async (req, res) => {
     }
 };
 
-// Update a note identified by the noteId in the request
+// Update a user by the email in the request
 exports.update = async (req, res) => {
     try {
         let token = null;
@@ -260,7 +267,7 @@ exports.update = async (req, res) => {
     }
 };
 
-// Delete a note with the specified noteId in the request
+// Delete a user with the specified email in the request
 exports.delete = async (req, res) => {
     try {
         let token = null;
